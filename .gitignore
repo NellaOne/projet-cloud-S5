@@ -1,0 +1,24 @@
+/vendor/
+
+# Environnement
+.env
+.env.backup
+.env.production
+
+# Logs
+/storage/logs/
+*.log
+
+# Cache & fichiers générés
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/views/
+/bootstrap/cache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

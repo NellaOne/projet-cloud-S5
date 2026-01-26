@@ -69,7 +69,7 @@ class AuthController extends Controller
      *         @OA\Property(property="token", type="string"),
      *         @OA\Property(property="user", type="object")
      *     )),
-     *     @OA\Response(status=401, description="Identifiants invalides ou compte verrouillé")
+     *     @OA\Response(status=401, description="Email ou mot de passe incorrect")
      * )
      */
     public function login(Request $request)
@@ -107,7 +107,7 @@ class AuthController extends Controller
                 }
             }
 
-            return response()->json(['error' => 'Identifiants invalides'], 401);
+            return response()->json(['error' => 'Email ou mot de passe incorrect'], 401);
         }
 
         // Connexion réussie

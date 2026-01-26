@@ -16,31 +16,6 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Manager par défaut
-        User::create([
-            'name' => 'Manager Default',
-            'email' => 'manager@example.com',
-            'password' => Hash::make('manager123'),
-            'role' => 'manager',
-            'is_active' => true,
-        ]);
-
-        // Utilisateur test
-        User::create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => Hash::make('test123'),
-            'role' => 'user',
-            'is_active' => true,
-        ]);
-
-        // Utilisateur supplémentaire
-        User::create([
-            'name' => 'Alice Dupont',
-            'email' => 'alice@example.com',
-            'password' => Hash::make('alice123'),
-            'role' => 'user',
-            'is_active' => true,
-        ]);
+        $this->call(UserSeeder::class);
     }
 }

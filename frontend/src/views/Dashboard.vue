@@ -25,6 +25,10 @@
           <ion-icon slot="start" name="list"></ion-icon>
           Voir les signalements
         </ion-button>
+        <ion-button expand="full" router-link="/map" class="action-btn map-btn">
+          <ion-icon slot="start" name="map"></ion-icon>
+          Voir la carte
+        </ion-button>
       </div>
 
       <div class="roads-section">
@@ -130,6 +134,10 @@ onMounted(() => {
 
 .action-btn.secondary {
   --background: #28a745;
+}
+
+.action-btn.map-btn {
+  --background: #ff6b35;
 }
 
 .roads-section h3 {

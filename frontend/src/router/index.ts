@@ -7,6 +7,7 @@ import ForgotPassword from '../views/ForgotPassword.vue'
 import Dashboard from '../views/Dashboard.vue'
 import Report from '../views/Report.vue';
 import ReportsList from '../views/ReportsList.vue';
+import Map from '../views/Map.vue';
 import { auth } from '../firebase'
 import { onAuthStateChanged } from 'firebase/auth'
 
@@ -54,6 +55,12 @@ const routes: Array<RouteRecordRaw> = [
     path: '/reports-list',
     name: 'ReportsList',
     component: ReportsList,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/map',
+    name: 'Map',
+    component: Map,
     meta: { requiresAuth: true }
   },
   {

@@ -54,14 +54,15 @@
 import { ref, onMounted } from 'vue';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonList, IonItem, IonLabel, IonButton, IonButtons, IonIcon, IonBackButton } from '@ionic/vue';
 import { addIcons } from 'ionicons';
-import { add, remove, home, map as mapIcon, location, list, alertCircle, chevronUpOutline, chevronDownOutline } from 'ionicons/icons';
+import { add, remove, home, map as mapIcon, location, list, alertCircle, chevronUpOutline, chevronDownOutline, navigate } from 'ionicons/icons';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import api from '../services/api';
+import { Geolocation } from '@capacitor/geolocation';
 
 // Enregistrer les icônes
 addIcons({
-  add, remove, home, map: mapIcon, location, list, alertCircle,
+  add, remove, home, map: mapIcon, location, list, alertCircle, navigate,
   'chevron-up-outline': chevronUpOutline,
   'chevron-down-outline': chevronDownOutline
 });
@@ -123,6 +124,111 @@ const panelCollapsed = ref(false);
 let map: L.Map | null = null;
 let markerGroup: L.FeatureGroup | null = null;
 const markers: { [key: number]: any } = {};
+let userMarker: L.Marker | null = null;
+let userCircle: L.Circle | null = null;
+
+// Créer un icône personnalisé pour l'utilisateur
+const createUserIcon = () => {
+  return L.divIcon({
+    html: `
+      <div style="
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 50px;
+        height: 50px;
+        background: radial-gradient(circle, #4CAF50 0%, #2E7D32 100%);
+        border-radius: 50%;
+        border: 4px solid white;
+        box-shadow: 0 2px 12px rgba(76, 175, 80, 0.6), inset 0 0 0 3px rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        position: relative;
+      ">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2">
+          <circle cx="12" cy="12" r="8"/>
+          <path d="M12 2v8m0 4v8M2 12h8m4 0h8"/>
+        </svg>
+        <div style="
+          position: absolute;
+          bottom: -8px;
+          right: -8px;
+          width: 16px;
+          height: 16px;
+          background: #1976d2;
+          border-radius: 50%;
+          border: 2px solid white;
+          font-size: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-weight: bold;
+        ">✓</div>
+      </div>
+    `,
+    iconSize: [50, 50],
+    iconAnchor: [25, 25],
+    popupAnchor: [0, -25],
+  });
+};
+
+// Obtenir la position utilisateur
+const getUserLocation = async () => {
+  try {
+    console.log('📍 Demande de localisation...');
+    const coordinates = await Geolocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0,
+    });
+    
+    const { latitude, longitude, accuracy } = coordinates.coords;
+    console.log(`✓ Position obtenue: ${latitude}, ${longitude}, Precision: ${accuracy}m`);
+    
+    if (!map) return;
+    
+    // Supprimer l'ancien marqueur s'il existe
+    if (userMarker) {
+      map.removeLayer(userMarker);
+    }
+    if (userCircle) {
+      map.removeLayer(userCircle);
+    }
+    
+    // Ajouter le cercle de précision
+    userCircle = L.circle([latitude, longitude], {
+      color: '#4CAF50',
+      weight: 2,
+      opacity: 0.3,
+      fill: true,
+      fillColor: '#4CAF50',
+      fillOpacity: 0.1,
+      radius: accuracy || 50,
+    }).addTo(map);
+    
+    // Ajouter le marqueur utilisateur
+    userMarker = L.marker([latitude, longitude], {
+      icon: createUserIcon(),
+      zIndexOffset: 1000,
+    })
+      .bindPopup(`
+        <div style="text-align: center; font-size: 13px; font-family: Arial;">
+          <strong style="color: #4CAF50;">📍 Votre Position</strong><br>
+          Lat: ${latitude.toFixed(6)}<br>
+          Lon: ${longitude.toFixed(6)}<br>
+          Précision: ${accuracy ? accuracy.toFixed(0) : '?'} m
+        </div>
+      `)
+      .addTo(map)
+      .openPopup();
+    
+    // Centrer la carte sur l'utilisateur avec un bon zoom
+    map.setView([latitude, longitude], 17);
+  } catch (error: any) {
+    console.error('❌ Erreur de géolocalisation:', error);
+    alert(`Impossible de vous localiser: ${error.message}`);
+  }
+};
 
 // Charger les routes depuis l'API
 const fetchRoads = async () => {
